@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트 자리 배치 프로그램</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif; margin: 0; background: #f4f6f9; color: #333; }
+        .page { display: none; padding: 15px; max-width: 1400px; margin: 0 auto; }
+        .page.active { display: block; }
+        
+        h2, h3 { color: #2c3e50; text-align: center; margin-top: 10px; }
+        button { background: #3498db; color: #fff; border: none; padding: 10px 16px; font-size: 14px; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 3px; transition: 0.2s; }
+        button:hover { opacity: 0.9; }
+        button.secondary { background: #e67e22; }
+        button.success { background: #27ae60; }
+        button.danger { background: #e74c3c; }
+        button.purple { background: #8e44ad; }
+
+        .step1-container { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .config-row { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; }
+        .box { flex: 1 1 300px; background: #eef2f7; padding: 15px; border-radius: 8px; min-width: 280px; }
+        
+        #sectionConfigs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; min-height: 50px; }
+        .section-config-card { background: #fff; padding: 10px; border: 1px solid #ccc; border-radius: 6px; text-align: center; width: 100px; }
+        .section-config-card input { width: 45px; padding: 4px; text-align: center; border: 1px solid #bbb; border-radius: 3px; }
+        
+        #groupConfigs { margin-top: 10px; max-height: 400px; overflow-y: auto; min-height: 80px; }
+        .group-input-box { background: #fff; padding: 12px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #ddd; }
+        .group-input-box input[type="text"] { width: 100%; max-width: 200px; padding: 6px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .group-input-box textarea { width: 100%; height: 90px; padding: 6px; border: 1px solid #ccc; border-radius: 4px; resize: vertical; font-size: 13px; }
+
+        .step2-layout { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; align-items: flex-start; }
+        .sidebar { width: 280px; background: #fff; border-radius: 8px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); max-height: 80vh; overflow-y: auto; flex-shrink: 0; }
+        .search-box { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 15px; }
+        
+        .group-category { margin-bottom: 15px; }
+        .group-category h4 { margin: 0 0 5px; font-size: 14px; color: #7f8c8d; border-bottom: 2px solid #ecf0f1; padding-bottom: 3px; }
+        .name-tag { background: #34495e; color: #fff; padding: 8px 10px; margin: 4px 0; text-align: center; border-radius: 4px; font-weight: bold; font-size: 13px; cursor: pointer; user-select: none; }
+        .name-tag.selected { background: #e67e22; transform: scale(1.02); box-shadow: 0 0 8px rgba(230, 126, 34, 0.6); }
+        .name-tag.assigned { background: #95a5a6; opacity: 0.5; text-decoration: line-through; cursor: default; }
+
+        .seat-main { flex: 1; background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-height: 70vh; overflow-x: auto; min-width: 300px; }
+        .seat-map-capture { display: flex; gap: 25px; align-items: center; background: #fff; padding: 20px; border-radius: 8px; justify-content: center; }
+        .podium-fixed { width: 70px; height: 120px; background: #2c3e50; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; gap: 6px; }
+        
+        .seat-container { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+        .group-seat-box { border: 2px solid #cbd5e1; padding: 15px; border-radius: 8px; background: #fafafa; }
+        .group-seat-box h4 { text-align: center; margin: 0 0 10px; color: #2c3e50; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
+        .seat-grid { display: grid; gap: 8px; }
+        .seat { background: #ecf0f1; border: 1px dashed #95a5a6; min-height: 48px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; cursor: pointer; user-select: none; }
+        .seat.filled { background: #27ae60; color: #fff; border: 1px solid #219653; }
+
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+    </style>
+</head>
+<body>
+
+<!-- 1페이지: 설정 및 명단 확인 -->
+<div id="page1" class="page active">
+    <div class="step1-container">
+        <h2>🪑 1단계: 좌석 구조 및 집단별 명단 설정</h2>
+        <div class="config-row">
+            <div class="box">
+                <label style="font-weight:bold;">분단 수 설정:</label>
+                <input type="number" id="numSections" min="1" max="8" value="3" onchange="renderSectionConfigs()" style="width: 60px; padding: 5px;">
+                <div style="margin-top: 10px; font-weight: bold; font-size: 14px; color: #555;">각 분단별 행·열 설정:</div>
+                <div id="sectionConfigs"></div>
+            </div>
+            <div class="box">
+                <label style="font-weight:bold;">참가자 집단(그룹) 수 설정:</label>
+                <input type="number" id="numGroups" min="1" max="5" value="4" onchange="renderGroupConfigs()" style="width: 60px; padding: 5px;">
+                <div style="margin-top: 10px; font-weight: bold; font-size: 14px; color: #555;">집단 명칭 및 명단 입력:</div>
+                <div id="groupConfigs"></div>
+            </div>
+        </div>
+        <div style="text-align: center; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button class="secondary" onclick="saveData()">💾 설정 저장하기</button>
+            <button class="danger" onclick="resetToDefaultData()">🔄 명단 및 설정 초기화</button>
+            <button class="success" onclick="goToStep2()" style="font-size: 16px; padding: 12px 25px;">🚀 자리 배치 시작</button>
+        </div>
+    </div>
+</div>
+
+<!-- 2페이지: 자리 배치 대화면 -->
+<div id="page2" class="page">
+    <div class="top-bar">
+        <button class="secondary" onclick="goToStep1()">⬅️ 설정 수정</button>
+        <h2>🪑 2단계: 클릭 토글 방식 자리 배치</h2>
+        <div>
+            <button class="purple" onclick="exportSeatImage()">📸 이미지 저장(PNG)</button>
+            <button class="danger" onclick="resetSeats()">🔄 전체 자리 비우기</button>
+        </div>
+    </div>
+    <div class="step2-layout">
+        <div class="sidebar">
+            <h3>참가자 대기실</h3>
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 이름 검색..." oninput="renderSidebar()">
+            <div style="font-size: 11px; color: #e74c3c; margin-bottom: 10px; text-align: center;">💡 이름을 클릭 후 빈 좌석을 클릭하세요!</div>
+            <div id="sidebar-groups"></div>
+        </div>
+        <div class="seat-main">
+            <div id="seat-map-capture" class="seat-map-capture">
+                <div class="podium-fixed">
+                    <span style="font-size:28px;">🏛️</span>
+                    <span style="font-size:11px; font-weight:bold;">연단</span>
+                </div>
+                <div id="seat-container" class="seat-container"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 코드 내부에 기본 저장된 백업 데이터
+    const DEFAULT_DATA = {
+        sections: [
+            { r: "4", c: "8" },
+            { r: "8", c: "9" },
+            { r: "4", c: "7" }
+        ],
+        groups: [
+            {
+                name: "신탄진",
+                text: "김선기\n안기용\n강성구\n박광훈\n안규진\n김동수\n이석구\n이문자\n안지영\n김종순\n안여진\n임천임\n현영옥\n심송희\n김미랑\n김채은\n김소은\n이순이\n이은정\n주은하\n정춘희\n김영순\n고미화"
+            },
+            {
+                name: "목상",
+                text: "신인수\n김용성\n임규석\n홍지수\n김민지\n이재명\n이건호\n이미형\n이예은\n장민서\n김순자\n홍미경\n홍정숙\n강신혜\n이진선\n박승진\n이미용\n김은지\n김정임\n최충렬\n오성우\n강춘성\n이봉순\n박미현\n오현솔"
+            },
+            {
+                name: "새여울",
+                text: "최석환\n이재원\n이승노\n양인호\n박정현\n이명오\n정규식\n채시연\n도경운\n조민경\n양수연\n이염심\n박서하\n김귀복\n정효숙\n이수빈\n김선미\n이하윤\n이영희\n이경언\n황명순\n김정연\n이민서\n이성우\n양승원"
+            },
+            {
+                name: "엑슬루",
+                text: "문정민\n박병연\n박창환\n최의식\n최원균\n전성진\n문강민\n문다율\n문예을\n문시율\n김길자\n박지혜\n윤영숙\n강영례\n현일순\n이선예\n정옥춘\n유춘화\n장은주\n복미경\n이숙자\n이갑수"
+            }
+        ],
+        assignments: {}
+    };
+
+    let seatAssignments = {};
+    let selectedStudent = null;
+
+    window.onload = function() {
+        loadData();
+        renderSectionConfigs();
+        renderGroupConfigs();
+        loadInputs();
+    };
+
+    function loadData() {
+        try {
+            let s = JSON.parse(localStorage.getItem('smart_seat_sections'));
+            let g = JSON.parse(localStorage.getItem('smart_seat_groups'));
+            
+            // 저장된 데이터가 없으면 기본 데이터 탑재
+            if (!s || !g) {
+                s = DEFAULT_DATA.sections;
+                g = DEFAULT_DATA.groups;
+                localStorage.setItem('smart_seat_sections', JSON.stringify(s));
+                localStorage.setItem('smart_seat_groups', JSON.stringify(g));
+            }
+            
+            document.getElementById('numSections').value = s.length;
+            document.getElementById('numGroups').value = g.length;
+            seatAssignments = JSON.parse(localStorage.getItem('smart_seat_assignments') || '{}');
+        } catch(e) {
+            document.getElementById('numSections').value = DEFAULT_DATA.sections.length;
+            document.getElementById('numGroups').value = DEFAULT_DATA.groups.length;
+        }
+    }
+
+    function loadInputs() {
+        try {
+            let secs = JSON.parse(localStorage.getItem('smart_seat_sections')) || DEFAULT_DATA.sections;
+            let grps = JSON.parse(localStorage.getItem('smart_seat_groups')) || DEFAULT_DATA.groups;
+            
+            secs.forEach((s, idx) => {
+                let r = document.getElementById(`sec_${idx+1}_rows`), c = document.getElementById(`sec_${idx+1}_cols`);
+                if(r) r.value = s.r; if(c) c.value = s.c;
+            });
+            grps.forEach((g, idx) => {
+                let n = document.getElementById(`group_name_${idx}`), t = document.getElementById(`group_text_${idx}`);
+                if(n) n.value = g.name; if(t) t.value = g.text;
+            });
+        } catch(e){}
+    }
+
+    function saveData() {
+        let secs = [], grps = [];
+        let numSec = document.getElementById('numSections').value;
+        let numGrp = document.getElementById('numGroups').value;
+
+        for(let i=1; i<=numSec; i++) {
+            let r = document.getElementById(`sec_${i}_rows`), c = document.getElementById(`sec_${i}_cols`);
+            if(r && c) secs.push({ r: r.value, c: c.value });
+        }
+        for(let i=0; i<numGrp; i++) {
+            let n = document.getElementById(`group_name_${i}`), t = document.getElementById(`group_text_${i}`);
+            if(n && t) grps.push({ name: n.value, text: t.value });
+        }
+
+        try {
+            localStorage.setItem('smart_seat_sections', JSON.stringify(secs));
+            localStorage.setItem('smart_seat_groups', JSON.stringify(grps));
+            localStorage.setItem('smart_seat_assignments', JSON.stringify(seatAssignments));
+            alert('현재 설정을 저장했습니다.');
+        } catch(e){}
+    }
+
+    function resetToDefaultData() {
+        if(confirm('기본 명단과 분단 설정으로 초기화하시겠습니까?')) {
+            localStorage.setItem('smart_seat_sections', JSON.stringify(DEFAULT_DATA.sections));
+            localStorage.setItem('smart_seat_groups', JSON.stringify(DEFAULT_DATA.groups));
+            seatAssignments = {};
+            localStorage.setItem('smart_seat_assignments', JSON.stringify(seatAssignments));
+            
+            loadData();
+            renderSectionConfigs();
+            renderGroupConfigs();
+            loadInputs();
+            alert('초기화가 완료되었습니다.');
+        }
+    }
+
+    function renderSectionConfigs() {
+        let num = parseInt(document.getElementById('numSections').value) || 1;
+        let container = document.getElementById('sectionConfigs');
+        let old = getSectionValues();
+        container.innerHTML = Array.from({length: num}, (_, i) => {
+            let idx = i + 1;
+            let r = old[idx]?.r || DEFAULT_DATA.sections[i]?.r || 3;
+            let c = old[idx]?.c || DEFAULT_DATA.sections[i]?.c || 2;
+            return `<div class="section-config-card"><b>${idx}분단</b><br>행: <input type="number" id="sec_${idx}_rows" min="1" max="10" value="${r}"><br>열: <input type="number" id="sec_${idx}_cols" min="1" max="10" value="${c}"></div>`;
+        }).join('');
+    }
+
+    function getSectionValues() {
+        let res = {};
+        for(let i=1; i<=10; i++) {
+            let r = document.getElementById(`sec_${i}_rows`), c = document.getElementById(`sec_${i}_cols`);
+            if(r && c) res[i] = { r: r.value, c: c.value };
+        }
+        return res;
+    }
+
+    function renderGroupConfigs() {
+        let num = parseInt(document.getElementById('numGroups').value) || 1;
+        let container = document.getElementById('groupConfigs');
+        let old = getGroupValues();
+
+        container.innerHTML = Array.from({length: num}, (_, i) => {
+            let name = old[i]?.name || DEFAULT_DATA.groups[i]?.name || `집단 ${i+1}`;
+            let text = old[i]?.text || DEFAULT_DATA.groups[i]?.text || '';
+            return `<div class="group-input-box"><div style="font-weight:bold; font-size:13px; margin-bottom:4px;">집단 ${i+1} 설정</div>명칭: <input type="text" id="group_name_${i}" value="${name}"><textarea id="group_text_${i}" placeholder="이름을 줄바꿈으로 입력">${text}</textarea></div>`;
+        }).join('');
+    }
+
+    function getGroupValues() {
+        let res = [];
+        for(let i=0; i<10; i++) {
+            let n = document.getElementById(`group_name_${i}`), t = document.getElementById(`group_text_${i}`);
+            if(n && t) res[i] = { name: n.value, text: t.value };
+        }
+        return res;
+    }
+
+    function goToStep2() {
+        saveData();
+        document.getElementById('page1').classList.remove('active');
+        document.getElementById('page2').classList.add('active');
+        selectedStudent = null;
+        renderSidebar();
+        renderSeatMap();
+    }
+
+    function goToStep1() {
+        document.getElementById('page2').classList.remove('active');
+        document.getElementById('page1').classList.add('active');
+    }
+
+    function renderSidebar() {
+        let container = document.getElementById('sidebar-groups');
+        container.innerHTML = '';
+        let numGrp = document.getElementById('numGroups').value;
+        let query = document.getElementById('searchInput').value.toLowerCase();
+
+        for (let i = 0; i < numGrp; i++) {
+            let gName = document.getElementById(`group_name_${i}`)?.value;
+            let gText = document.getElementById(`group_text_${i}`)?.value;
+            if(!gName || !gText) continue;
+
+            let names = gText.split(/[\n,]+/).map(n => n.trim()).filter(Boolean).sort((a,b) => a.localeCompare(b, 'ko'));
+            let categoryDiv = document.createElement('div');
+            categoryDiv.className = 'group-category';
+            categoryDiv.innerHTML = `<h4>${gName} (${names.length}명)</h4>`;
+
+            let visibleCount = 0;
+            names.forEach(name => {
+                if(query && !name.toLowerCase().includes(query)) return;
+                visibleCount++;
+
+                let tag = document.createElement('div');
+                tag.className = 'name-tag';
+                tag.innerText = name;
+
+                let isAssigned = Object.values(seatAssignments).some(s => s.name === name);
+                if(isAssigned) {
+                    tag.classList.add('assigned');
+                } else {
+                    if(selectedStudent === name) tag.classList.add('selected');
+                    tag.onclick = () => {
+                        selectedStudent = (selectedStudent === name) ? null : name;
+                        renderSidebar();
+                    };
+                }
+                categoryDiv.appendChild(tag);
+            });
+
+            if(visibleCount > 0) container.appendChild(categoryDiv);
+        }
+    }
+
+    function renderSeatMap() {
+        let container = document.getElementById('seat-container');
+        container.innerHTML = '';
+        let numSec = document.getElementById('numSections').value;
+
+        for (let i = 1; i <= numSec; i++) {
+            let rows = parseInt(document.getElementById(`sec_${i}_rows`)?.value) || 1;
+            let cols = parseInt(document.getElementById(`sec_${i}_cols`)?.value) || 1;
+
+            let groupDiv = document.createElement('div');
+            groupDiv.className = 'group-seat-box';
+            groupDiv.innerHTML = `<h4>${i}분단 (${rows}x${cols})</h4>`;
+
+            let gridDiv = document.createElement('div');
+            gridDiv.className = 'seat-grid';
+            gridDiv.style.gridTemplateColumns = `repeat(${cols}, 75px)`;
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    let seatId = `sec_${i}_r_${r}_c_${c}`;
+                    let seat = document.createElement('div');
+                    seat.className = 'seat';
+                    let assigned = seatAssignments[seatId];
+
+                    if(assigned) {
+                        seat.innerText = assigned.name;
+                        seat.classList.add('filled');
+                    }
+
+                    seat.onclick = () => {
+                        if(assigned) {
+                            delete seatAssignments[seatId];
+                        } else if(selectedStudent) {
+                            seatAssignments[seatId] = { name: selectedStudent };
+                            selectedStudent = null;
+                        } else {
+                            return alert('먼저 대기실에서 이름을 선택해주세요!');
+                        }
+                        try { localStorage.setItem('smart_seat_assignments', JSON.stringify(seatAssignments)); } catch(e){}
+                        renderSeatMap();
+                        renderSidebar();
+                    };
+                    gridDiv.appendChild(seat);
+                }
+            }
+            groupDiv.appendChild(gridDiv);
+            container.appendChild(groupDiv);
+        }
+    }
+
+    function resetSeats() {
+        if(confirm('모든 좌석 배치를 초기화하시겠습니까?')) {
+            seatAssignments = {};
+            selectedStudent = null;
+            try { localStorage.setItem('smart_seat_assignments', JSON.stringify(seatAssignments)); } catch(e){}
+            renderSeatMap();
+            renderSidebar();
+        }
+    }
+
+    function exportSeatImage() {
+        let target = document.getElementById('seat-map-capture');
+        html2canvas(target, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+            let link = document.createElement('a');
+            link.download = '자리배치도.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    }
+</script>
+</body>
+</html>
