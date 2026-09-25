@@ -45,11 +45,10 @@
         .group-category { margin-bottom: 15px; }
         .group-category h4 { margin: 0 0 5px; font-size: 14px; color: #7f8c8d; border-bottom: 2px solid #ecf0f1; padding-bottom: 3px; }
         
-        /* 성별에 따른 기본 태그 색상 (남: 연한 파랑 계열, 여: 연한 핑크 계열, 미설정: 기본 어두운 색) */
         .name-tag { color: #fff; padding: 8px 10px; margin: 4px 0; text-align: center; border-radius: 4px; font-weight: bold; font-size: 13px; cursor: pointer; user-select: none; }
-        .name-tag.gender-m { background: #2980b9; } /* 남성 */
-        .name-tag.gender-f { background: #c0392b; } /* 여성 */
-        .name-tag.gender-none { background: #34495e; } /* 미설정 */
+        .name-tag.gender-m { background: #2980b9; } 
+        .name-tag.gender-f { background: #c0392b; } 
+        .name-tag.gender-none { background: #34495e; } 
         
         .name-tag.selected { transform: scale(1.02); box-shadow: 0 0 8px rgba(0, 0, 0, 0.4); border: 2px solid #f1c40f; }
         .name-tag.assigned { background: #95a5a6 !important; opacity: 0.5; text-decoration: line-through; cursor: default; }
@@ -58,11 +57,13 @@
         .team-tag.selected { transform: scale(1.02); box-shadow: 0 0 8px rgba(0, 0, 0, 0.2); }
 
         .seat-main { flex: 1; background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-height: 70vh; overflow-x: auto; min-width: 300px; }
-        .seat-map-capture { display: flex; gap: 25px; align-items: center; background: #fff; padding: 20px; border-radius: 8px; justify-content: center; flex-wrap: wrap; }
-        .podium-fixed { width: 70px; height: 100px; background: #2c3e50; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; gap: 6px; }
         
-        .seat-container { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; justify-content: center; }
-        .group-seat-box { border: 2px solid #cbd5e1; padding: 15px; border-radius: 8px; background: #fafafa; }
+        /* 연단이 왼쪽에 정확히 위치하고 분단들과 수직 중앙(가운데) 정렬되도록 설정 */
+        .seat-map-capture { display: flex; gap: 25px; align-items: center; background: #fff; padding: 20px; border-radius: 8px; justify-content: flex-start; flex-wrap: nowrap; min-width: max-content; }
+        .podium-fixed { width: 75px; height: 110px; background: #2c3e50; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
+        
+        .seat-container { display: flex; gap: 20px; flex-wrap: nowrap; align-items: center; }
+        .group-seat-box { border: 2px solid #cbd5e1; padding: 15px; border-radius: 8px; background: #fafafa; flex-shrink: 0; }
         .group-seat-box h4 { text-align: center; margin: 0 0 10px; color: #2c3e50; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
         .seat-grid { display: grid; gap: 8px; }
         .seat { background: #ecf0f1; border: 1px dashed #95a5a6; min-height: 48px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; cursor: pointer; user-select: none; padding: 4px; text-align: center; word-break: break-all; color: #333; }
@@ -99,7 +100,7 @@
             </div>
             <div class="box">
                 <label style="font-weight:bold;">참가자 집단(그룹) 수 설정:</label>
-                <input type="number" id="numGroups" min="1" max="5" value="4" onchange="renderGroupConfigs()" style="width: 60px; padding: 5px;">
+                <input type="number" id="numGroups" min="1" max="5" value="2" onchange="renderGroupConfigs()" style="width: 60px; padding: 5px;">
                 <div style="margin-top: 10px; font-weight: bold; font-size: 14px; color: #555;">집단 명칭 및 명단 입력:</div>
                 <div id="groupConfigs"></div>
             </div>
@@ -202,11 +203,11 @@
             { r: "3", c: "4" }
         ],
         groups: [
-            { name: "A그룹", text: "김철수\n이영희\n박민수" },
-            { name: "B그룹", text: "홍길동\n김민지\n최서준" }
+            { name: "A그룹", text: "" },
+            { name: "B그룹", text: "" }
         ],
         assignments: {},
-        participantDetails: {} // name -> { gender: 'M'/'F'/'none', car: true/false }
+        participantDetails: {} 
     };
 
     const PRESET_COLORS = ['#e74c3c', '#3498db', '#27ae60', '#f39c12', '#9b59b6', '#1abc9c', '#d35400', '#2980b9', '#c0392b', '#16a085'];
@@ -283,7 +284,6 @@
             if(n && t) grps.push({ name: n.value, text: t.value });
         }
 
-        // 현재 입력된 모든 이름 추출하여 상세 정보 기본값 동기화
         grps.forEach(g => {
             let names = g.text.split(/[\n,]+/).map(n => n.trim()).filter(Boolean);
             names.forEach(name => {
@@ -303,7 +303,7 @@
     }
 
     function openDetailModal() {
-        saveData(); // 우선 현재 입력된 이름들 최신화
+        saveData(); 
         let container = document.getElementById('detailListContainer');
         container.innerHTML = '';
         
