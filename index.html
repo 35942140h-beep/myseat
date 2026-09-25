@@ -93,6 +93,7 @@
         <button class="secondary" onclick="goToStep1()">⬅️ 설정 수정</button>
         <h2>🪑 2단계: 클릭 토글 방식 자리 배치</h2>
         <div>
+            <button class="secondary" onclick="undoSeatAction()">↩️ 실행 취소</button>
             <button class="purple" onclick="exportSeatImage()">📸 이미지 저장(PNG)</button>
             <button class="danger" onclick="resetSeats()">🔄 전체 자리 비우기</button>
         </div>
@@ -145,6 +146,7 @@
     };
 
     let seatAssignments = {};
+    let seatHistory = []; // 실행 취소를 위한 히스토리 스택
     let selectedStudent = null;
 
     window.onload = function() {
@@ -213,7 +215,6 @@
         } catch(e){}
     }
 
-    // 백업 파일 다운로드 (JSON)
     function exportBackupJSON() {
         saveData();
         let data = {
@@ -230,7 +231,6 @@
         URL.revokeObjectURL(url);
     }
 
-    // 백업 파일 불러오기 (JSON)
     function importBackupJSON(event) {
         let file = event.target.files[0];
         if (!file) return;
@@ -263,6 +263,7 @@
             localStorage.setItem('smart_seat_sections', JSON.stringify(DEFAULT_DATA.sections));
             localStorage.setItem('smart_seat_groups', JSON.stringify(DEFAULT_DATA.groups));
             seatAssignments = {};
+            seatHistory = [];
             localStorage.setItem('smart_seat_assignments', JSON.stringify(seatAssignments));
             
             loadData();
@@ -320,6 +321,7 @@
         document.getElementById('page1').classList.remove('active');
         document.getElementById('page2').classList.add('active');
         selectedStudent = null;
+        seatHistory = []; // 2단계 진입 시 히스토리 초기화
         renderSidebar();
         renderSeatMap();
     }
@@ -401,14 +403,20 @@
                     }
 
                     seat.onclick = () => {
+                        if (!assigned && !selectedStudent) {
+                            return alert('먼저 대기실에서 이름을 선택해주세요!');
+                        }
+
+                        // 변경 전 상태를 기록 (실행 취소용)
+                        seatHistory.push(JSON.parse(JSON.stringify(seatAssignments)));
+
                         if(assigned) {
                             delete seatAssignments[seatId];
                         } else if(selectedStudent) {
                             seatAssignments[seatId] = { name: selectedStudent };
                             selectedStudent = null;
-                        } else {
-                            return alert('먼저 대기실에서 이름을 선택해주세요!');
                         }
+
                         try { localStorage.setItem('smart_seat_assignments', JSON.stringify(seatAssignments)); } catch(e){}
                         renderSeatMap();
                         renderSidebar();
@@ -421,8 +429,22 @@
         }
     }
 
+    // 실행 취소 기능
+    function undoSeatAction() {
+        if (seatHistory.length === 0) {
+            alert('되돌릴 작업이 없습니다.');
+            return;
+        }
+        seatAssignments = seatHistory.pop();
+        selectedStudent = null;
+        try { localStorage.setItem('smart_seat_assignments', JSON.stringify(seatAssignments)); } catch(e){}
+        renderSeatMap();
+        renderSidebar();
+    }
+
     function resetSeats() {
         if(confirm('모든 좌석 배치를 초기화하시겠습니까?')) {
+            seatHistory.push(JSON.parse(JSON.stringify(seatAssignments)));
             seatAssignments = {};
             selectedStudent = null;
             try { localStorage.setItem('smart_seat_assignments', JSON.stringify(seatAssignments)); } catch(e){}
