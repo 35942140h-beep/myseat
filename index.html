@@ -56,10 +56,12 @@
 
         .seat-main { flex: 1; background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-height: 70vh; overflow-x: auto; min-width: 300px; }
         
-        .seat-map-capture { display: flex; gap: 25px; align-items: flex-start; background: #fff; padding: 20px; border-radius: 8px; justify-content: flex-start; }
+        /* 연단이 세로로 정렬된 분단들의 왼쪽 '중앙'에 오도록 align-items: center 설정 */
+        .seat-map-capture { display: flex; gap: 25px; align-items: center; background: #fff; padding: 20px; border-radius: 8px; justify-content: flex-start; }
         .podium-fixed { width: 75px; height: 110px; background: #2c3e50; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.15); position: sticky; left: 0; }
         
-        .seat-container { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; flex: 1; }
+        /* 분단들을 세로 방향(column)으로 정렬 */
+        .seat-container { display: flex; flex-direction: column; gap: 20px; align-items: flex-start; flex: 1; }
         .group-seat-box { border: 2px solid #cbd5e1; padding: 15px; border-radius: 8px; background: #fafafa; flex-shrink: 0; }
         .group-seat-box h4 { text-align: center; margin: 0 0 10px; color: #2c3e50; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
         .seat-grid { display: grid; gap: 8px; }
@@ -185,16 +187,20 @@
     let seatAssignments = {}, teamAssignments = {}, participantDetails = {}, seatHistory = [];
     let selectedStudent = null, selectedTeam = null;
 
-    window.onload = () => { loadData(); renderSectionConfigs(); renderGroupConfigs(); loadInputs(); renderTeamConfigs(); };
+    window.onload = () => { loadData(); loadInputs(); renderTeamConfigs(); };
 
     function getVal(id) { return document.getElementById(id)?.value; }
+    
     function saveAll() {
+        localStorage.setItem('ss_num_sec', getVal('numSections') || 3);
+        localStorage.setItem('ss_num_grp', getVal('numGroups') || 2);
         localStorage.setItem('ss_sec', JSON.stringify(getSections()));
         localStorage.setItem('ss_grp', JSON.stringify(getGroups()));
         localStorage.setItem('ss_seat', JSON.stringify(seatAssignments));
         localStorage.setItem('ss_team', JSON.stringify(teamAssignments));
         localStorage.setItem('ss_det', JSON.stringify(participantDetails));
     }
+
     function loadData() {
         seatAssignments = JSON.parse(localStorage.getItem('ss_seat') || '{}');
         teamAssignments = JSON.parse(localStorage.getItem('ss_team') || '{}');
@@ -234,15 +240,29 @@
     }
 
     function loadInputs() {
+        let savedNumSec = localStorage.getItem('ss_num_sec') || '3';
+        let savedNumGrp = localStorage.getItem('ss_num_grp') || '2';
+        
+        if(document.getElementById('numSections')) document.getElementById('numSections').value = savedNumSec;
+        if(document.getElementById('numGroups')) document.getElementById('numGroups').value = savedNumGrp;
+
+        renderSectionConfigs();
+        renderGroupConfigs();
+
         let s = JSON.parse(localStorage.getItem('ss_sec') || '[]');
         s.forEach((v, i) => { 
-            if(document.getElementById(`sec_${i+1}_rows`)) document.getElementById(`sec_${i+1}_rows`).value = v.r; 
-            if(document.getElementById(`sec_${i+1}_cols`)) document.getElementById(`sec_${i+1}_cols`).value = v.c; 
+            let rEl = document.getElementById(`sec_${i+1}_rows`);
+            let cEl = document.getElementById(`sec_${i+1}_cols`);
+            if(rEl) rEl.value = v.r; 
+            if(cEl) cEl.value = v.c; 
         });
+
         let g = JSON.parse(localStorage.getItem('ss_grp') || '[]');
         g.forEach((v, i) => { 
-            if(document.getElementById(`group_name_${i}`)) document.getElementById(`group_name_${i}`).value = v.name; 
-            if(document.getElementById(`group_text_${i}`)) document.getElementById(`group_text_${i}`).value = v.text; 
+            let nEl = document.getElementById(`group_name_${i}`);
+            let tEl = document.getElementById(`group_text_${i}`);
+            if(nEl) nEl.value = v.name; 
+            if(tEl) tEl.value = v.text; 
         });
     }
 
@@ -279,6 +299,8 @@
         saveData();
         [1,2,3].forEach(i => document.getElementById(`page${i}`).classList.remove('active'));
         document.getElementById(`page${step}`).classList.add('active');
+        
+        if(step === 1) { loadInputs(); }
         if(step === 2) { selectedStudent = null; seatHistory = []; renderAll(); }
         if(step === 3) { selectedTeam = null; renderTeamConfigs(); renderTeamSeatMap(); }
     }
@@ -440,32 +462,52 @@
 
     function exportBackupJSON() {
         saveData();
-        let blob = new Blob([JSON.stringify({sec: getSections(), grp: getGroups(), seat: seatAssignments, team: teamAssignments, det: participantDetails})], {type: 'application/json'});
-        let a = document.createElement('a'); a.download = 'backup.json'; a.href = URL.createObjectURL(blob); a.click();
+        let data = {
+            numSec: getVal('numSections'),
+            numGrp: getVal('numGroups'),
+            sec: getSections(),
+            grp: getGroups(),
+            seat: seatAssignments,
+            team: teamAssignments,
+            det: participantDetails
+        };
+        let blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+        let a = document.createElement('a'); a.download = 'smart_seat_backup.json'; a.href = URL.createObjectURL(blob); a.click();
     }
 
     function importBackupJSON(e) {
+        let file = e.target.files[0];
+        if(!file) return;
         let reader = new FileReader();
         reader.onload = (event) => {
             try {
                 let data = JSON.parse(event.target.result);
-                localStorage.setItem('ss_sec', JSON.stringify(data.sec));
-                localStorage.setItem('ss_grp', JSON.stringify(data.grp));
-                localStorage.setItem('ss_seat', JSON.stringify(data.seat));
-                localStorage.setItem('ss_team', JSON.stringify(data.team));
-                localStorage.setItem('ss_det', JSON.stringify(data.det));
-                loadData(); renderSectionConfigs(); renderGroupConfigs(); loadInputs(); renderTeamConfigs();
-                alert('복원 완료!');
-            } catch(err) { alert('파일 오류'); }
+                if(data.sec && data.grp) {
+                    localStorage.setItem('ss_num_sec', data.numSec || data.sec.length);
+                    localStorage.setItem('ss_num_grp', data.numGrp || data.grp.length);
+                    localStorage.setItem('ss_sec', JSON.stringify(data.sec));
+                    localStorage.setItem('ss_grp', JSON.stringify(data.grp));
+                    localStorage.setItem('ss_seat', JSON.stringify(data.seat || {}));
+                    localStorage.setItem('ss_team', JSON.stringify(data.team || {}));
+                    localStorage.setItem('ss_det', JSON.stringify(data.det || {}));
+                    
+                    loadData();
+                    loadInputs();
+                    alert('백업 파일을 성공적으로 불러왔습니다!');
+                } else {
+                    alert('올바른 백업 파일 형식이 아닙니다.');
+                }
+            } catch(err) { alert('파일을 읽는 중 오류가 발생했습니다.'); }
         };
-        reader.readAsText(e.target.files[0]);
+        reader.readAsText(file);
+        e.target.value = '';
     }
 
     function resetData() {
-        if(confirm('초기화하시겠습니까?')) {
+        if(confirm('모든 설정과 데이터를 초기화하시겠습니까?')) {
             localStorage.clear();
             seatAssignments = {}; teamAssignments = {}; participantDetails = {}; seatHistory = [];
-            renderSectionConfigs(); renderGroupConfigs(); loadInputs();
+            loadInputs();
             alert('초기화되었습니다.');
         }
     }
