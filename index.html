@@ -33,7 +33,6 @@
         .group-input-box input[type="text"] { width: 100%; max-width: 200px; padding: 6px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 4px; }
         .group-input-box textarea { width: 100%; height: 90px; padding: 6px; border: 1px solid #ccc; border-radius: 4px; resize: vertical; font-size: 13px; }
 
-        /* 상세 정보 설정 모달 스타일 */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
         .modal-content { background: #fff; padding: 25px; border-radius: 10px; width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .detail-item { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 8px 12px; margin-bottom: 6px; border-radius: 5px; border: 1px solid #e9ecef; font-size: 13px; }
@@ -49,20 +48,18 @@
         .name-tag.gender-m { background: #2980b9; } 
         .name-tag.gender-f { background: #c0392b; } 
         .name-tag.gender-none { background: #34495e; } 
-        
-        .name-tag.selected { transform: scale(1.02); box-shadow: 0 0 8px rgba(0, 0, 0, 0.4); border: 2px solid #f1c40f; }
+        .name-tag.selected { transform: scale(1.02); box-shadow: 0 0 8px rgba(0,0,0,0.4); border: 2px solid #f1c40f; }
         .name-tag.assigned { background: #95a5a6 !important; opacity: 0.5; text-decoration: line-through; cursor: default; }
 
         .team-tag { background: #fff; color: #333; padding: 8px 10px; margin: 4px 0; text-align: center; border-radius: 4px; font-weight: bold; font-size: 13px; cursor: pointer; user-select: none; border: 2px solid #ccc; display: flex; justify-content: space-between; align-items: center; }
-        .team-tag.selected { transform: scale(1.02); box-shadow: 0 0 8px rgba(0, 0, 0, 0.2); }
+        .team-tag.selected { transform: scale(1.02); box-shadow: 0 0 8px rgba(0,0,0,0.2); }
 
         .seat-main { flex: 1; background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-height: 70vh; overflow-x: auto; min-width: 300px; }
         
-        /* 연단이 왼쪽에 정확히 위치하고 분단들과 수직 중앙(가운데) 정렬되도록 설정 */
-        .seat-map-capture { display: flex; gap: 25px; align-items: center; background: #fff; padding: 20px; border-radius: 8px; justify-content: flex-start; flex-wrap: nowrap; min-width: max-content; }
-        .podium-fixed { width: 75px; height: 110px; background: #2c3e50; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
+        .seat-map-capture { display: flex; gap: 25px; align-items: flex-start; background: #fff; padding: 20px; border-radius: 8px; justify-content: flex-start; }
+        .podium-fixed { width: 75px; height: 110px; background: #2c3e50; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.15); position: sticky; left: 0; }
         
-        .seat-container { display: flex; gap: 20px; flex-wrap: nowrap; align-items: center; }
+        .seat-container { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; flex: 1; }
         .group-seat-box { border: 2px solid #cbd5e1; padding: 15px; border-radius: 8px; background: #fafafa; flex-shrink: 0; }
         .group-seat-box h4 { text-align: center; margin: 0 0 10px; color: #2c3e50; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
         .seat-grid { display: grid; gap: 8px; }
@@ -79,15 +76,12 @@
             .sidebar { width: 100%; max-height: 250px; }
             .seat-main { padding: 10px; min-height: 50vh; }
             .seat { min-height: 42px; font-size: 11px; }
-            .seat-grid { gap: 5px; }
-            button { padding: 8px 12px; font-size: 13px; }
-            h2 { font-size: 18px; }
         }
     </style>
 </head>
 <body>
 
-<!-- 1페이지: 설정 및 명단 확인 -->
+<!-- 1페이지 -->
 <div id="page1" class="page active">
     <div class="step1-container">
         <h2>🪑 1단계: 좌석 구조 및 집단별 명단 설정</h2>
@@ -105,71 +99,66 @@
                 <div id="groupConfigs"></div>
             </div>
         </div>
-        <div style="text-align: center; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 15px;">
+        <div style="text-align: center; margin-bottom: 15px;">
             <button class="dark" onclick="openDetailModal()">⚙️ 참가자 성별 및 차량 설정</button>
         </div>
         <div style="text-align: center; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-            <button class="secondary" onclick="saveData()">💾 설정 저장하기</button>
-            <button class="purple" onclick="exportBackupJSON()">📥 백업 파일 다운로드</button>
-            <button class="purple" onclick="document.getElementById('importFile').click()">📂 백업 파일 불러오기</button>
+            <button class="secondary" onclick="saveData(); alert('저장되었습니다.');">💾 설정 저장하기</button>
+            <button class="purple" onclick="exportBackupJSON()">📥 백업 다운로드</button>
+            <button class="purple" onclick="document.getElementById('importFile').click()">📂 백업 불러오기</button>
             <input type="file" id="importFile" style="display:none" accept=".json" onchange="importBackupJSON(event)">
-            <button class="danger" onclick="resetToDefaultData()">🔄 명단 및 설정 초기화</button>
-            <button class="success" onclick="goToStep2()" style="font-size: 16px; padding: 12px 25px;">🚀 자리 배치 시작</button>
+            <button class="danger" onclick="resetData()">🔄 초기화</button>
+            <button class="success" onclick="goToStep(2)" style="font-size: 16px; padding: 12px 25px;">🚀 자리 배치 시작</button>
         </div>
     </div>
 </div>
 
-<!-- 상세 정보 설정 모달 창 -->
+<!-- 상세 정보 모달 -->
 <div id="detailModal" class="modal">
     <div class="modal-content">
         <h3>🚗 참가자별 성별 및 차량 유무 설정</h3>
-        <p style="font-size: 12px; color: #666; text-align: center; margin-bottom: 15px;">이름을 입력한 인원들이 자동으로 여기에 등록됩니다. 성별과 차량 보유 여부를 지정해주세요.</p>
         <div id="detailListContainer" style="max-height: 50vh; overflow-y: auto; margin-bottom: 15px;"></div>
         <div style="text-align: center;">
-            <button class="success" onclick="closeDetailModal()">확인 및 저장</button>
+            <button class="success" onclick="document.getElementById('detailModal').style.display='none'; saveData();">확인 및 저장</button>
         </div>
     </div>
 </div>
 
-<!-- 2페이지: 자리 배치 대화면 -->
+<!-- 2페이지 -->
 <div id="page2" class="page">
     <div class="top-bar">
-        <button class="secondary" onclick="goToStep1()">⬅️ 설정 수정</button>
+        <button class="secondary" onclick="goToStep(1)">⬅️ 설정 수정</button>
         <h2>🪑 2단계: 클릭 토글 방식 자리 배치</h2>
         <div>
-            <button class="secondary" onclick="undoSeatAction()">↩️ 실행 취소</button>
-            <button class="purple" onclick="exportSeatImage()">📸 이미지 저장</button>
-            <button class="danger" onclick="resetSeats()">🔄 전체 비우기</button>
-            <button class="success" onclick="goToStep3()" style="background: #8e44ad;">🏆 팀 배정하기 ➡️</button>
+            <button class="secondary" onclick="undoSeat()">↩️ 취소</button>
+            <button class="purple" onclick="exportImage('seat-map-capture', '자리배치도.png')">📸 이미지 저장</button>
+            <button class="danger" onclick="if(confirm('비우시겠습니까?')) { seatHistory.push({...seatAssignments}); seatAssignments={}; teamAssignments={}; saveAll(); renderAll(); }">🔄 전체 비우기</button>
+            <button class="success" onclick="goToStep(3)" style="background: #8e44ad;">🏆 팀 배정하기 ➡️</button>
         </div>
     </div>
     <div class="step2-layout">
         <div class="sidebar">
             <h3>참가자 대기실</h3>
             <input type="text" id="searchInput" class="search-box" placeholder="🔍 이름 검색..." oninput="renderSidebar()">
-            <div style="font-size: 11px; color: #e74c3c; margin-bottom: 10px; text-align: center;">💡 이름을 클릭 후 빈 좌석을 클릭하세요!</div>
             <div id="sidebar-groups"></div>
         </div>
         <div class="seat-main">
             <div id="seat-map-capture" class="seat-map-capture">
-                <div class="podium-fixed">
-                    <span style="font-size:24px;">🏛️</span>
-                    <span style="font-size:10px; font-weight:bold;">연단</span>
-                </div>
+                <div class="podium-fixed"><span style="font-size:24px;">🏛️</span><span style="font-size:10px; font-weight:bold;">연단</span></div>
                 <div id="seat-container" class="seat-container"></div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- 3페이지: 팀 배정 페이지 -->
+<!-- 3페이지 -->
 <div id="page3" class="page">
     <div class="top-bar">
-        <button class="secondary" onclick="goToStep2()">⬅️ 자리 배치로</button>
+        <button class="secondary" onclick="goToStep(2)">⬅️ 자리 배치로</button>
         <h2>🏆 3단계: 팀 별 색상 테두리 배정</h2>
         <div>
-            <button class="purple" onclick="exportTeamImage()">📸 팀 배치 이미지</button>
-            <button class="danger" onclick="resetTeams()">🔄 팀 배정 초기화</button>
+            <button class="purple" onclick="exportImage('team-map-capture', '팀배치도.png')">📸 팀 이미지</button>
+            <button class="danger" onclick="if(confirm('팀 초기화?')) { teamAssignments={}; saveAll(); renderTeamSeatMap(); }">🔄 초기화</button>
         </div>
     </div>
     <div class="step2-layout">
@@ -180,15 +169,11 @@
                 <input type="number" id="numTeams" min="1" max="10" value="4" onchange="renderTeamConfigs()" style="width: 55px; padding: 4px; text-align: center;">
                 <div id="teamConfigsList" style="margin-top: 8px;"></div>
             </div>
-            <div style="font-size: 11px; color: #e74c3c; margin-bottom: 10px; text-align: center;">💡 아래 팀을 클릭 후 자리를 클릭하세요!</div>
             <div id="team-select-sidebar"></div>
         </div>
         <div class="seat-main">
             <div id="team-map-capture" class="seat-map-capture">
-                <div class="podium-fixed">
-                    <span style="font-size:24px;">🏛️</span>
-                    <span style="font-size:10px; font-weight:bold;">연단</span>
-                </div>
+                <div class="podium-fixed"><span style="font-size:24px;">🏛️</span><span style="font-size:10px; font-weight:bold;">연단</span></div>
                 <div id="team-seat-container" class="seat-container"></div>
             </div>
         </div>
@@ -196,592 +181,293 @@
 </div>
 
 <script>
-    const DEFAULT_DATA = {
-        sections: [
-            { r: "3", c: "4" },
-            { r: "3", c: "4" },
-            { r: "3", c: "4" }
-        ],
-        groups: [
-            { name: "A그룹", text: "" },
-            { name: "B그룹", text: "" }
-        ],
-        assignments: {},
-        participantDetails: {} 
-    };
+    const COLORS = ['#e74c3c', '#3498db', '#27ae60', '#f39c12', '#9b59b6', '#1abc9c', '#d35400', '#2980b9'];
+    let seatAssignments = {}, teamAssignments = {}, participantDetails = {}, seatHistory = [];
+    let selectedStudent = null, selectedTeam = null;
 
-    const PRESET_COLORS = ['#e74c3c', '#3498db', '#27ae60', '#f39c12', '#9b59b6', '#1abc9c', '#d35400', '#2980b9', '#c0392b', '#16a085'];
+    window.onload = () => { loadData(); renderSectionConfigs(); renderGroupConfigs(); loadInputs(); renderTeamConfigs(); };
 
-    let seatAssignments = {};
-    let seatHistory = []; 
-    let selectedStudent = null;
-
-    let teamAssignments = {}; 
-    let selectedTeam = null;
-    let participantDetails = {};
-
-    window.onload = function() {
-        loadData();
-        renderSectionConfigs();
-        renderGroupConfigs();
-        loadInputs();
-        renderTeamConfigs();
-    };
-
+    function getVal(id) { return document.getElementById(id)?.value; }
+    function saveAll() {
+        localStorage.setItem('ss_sec', JSON.stringify(getSections()));
+        localStorage.setItem('ss_grp', JSON.stringify(getGroups()));
+        localStorage.setItem('ss_seat', JSON.stringify(seatAssignments));
+        localStorage.setItem('ss_team', JSON.stringify(teamAssignments));
+        localStorage.setItem('ss_det', JSON.stringify(participantDetails));
+    }
     function loadData() {
-        try {
-            let s = JSON.parse(localStorage.getItem('smart_seat_sections'));
-            let g = JSON.parse(localStorage.getItem('smart_seat_groups'));
-            let d = JSON.parse(localStorage.getItem('smart_seat_details'));
-            
-            if (!s || !g) {
-                s = DEFAULT_DATA.sections;
-                g = DEFAULT_DATA.groups;
-                d = DEFAULT_DATA.participantDetails;
-                localStorage.setItem('smart_seat_sections', JSON.stringify(s));
-                localStorage.setItem('smart_seat_groups', JSON.stringify(g));
-                localStorage.setItem('smart_seat_details', JSON.stringify(d));
-            }
-            
-            document.getElementById('numSections').value = s.length;
-            document.getElementById('numGroups').value = g.length;
-            seatAssignments = JSON.parse(localStorage.getItem('smart_seat_assignments') || '{}');
-            teamAssignments = JSON.parse(localStorage.getItem('smart_seat_teams') || '{}');
-            participantDetails = d || {};
-        } catch(e) {
-            document.getElementById('numSections').value = DEFAULT_DATA.sections.length;
-            document.getElementById('numGroups').value = DEFAULT_DATA.groups.length;
-        }
+        seatAssignments = JSON.parse(localStorage.getItem('ss_seat') || '{}');
+        teamAssignments = JSON.parse(localStorage.getItem('ss_team') || '{}');
+        participantDetails = JSON.parse(localStorage.getItem('ss_det') || '{}');
     }
 
-    function loadInputs() {
-        try {
-            let secs = JSON.parse(localStorage.getItem('smart_seat_sections')) || DEFAULT_DATA.sections;
-            let grps = JSON.parse(localStorage.getItem('smart_seat_groups')) || DEFAULT_DATA.groups;
-            
-            secs.forEach((s, idx) => {
-                let r = document.getElementById(`sec_${idx+1}_rows`), c = document.getElementById(`sec_${idx+1}_cols`);
-                if(r) r.value = s.r; if(c) c.value = s.c;
-            });
-            grps.forEach((g, idx) => {
-                let n = document.getElementById(`group_name_${idx}`), t = document.getElementById(`group_text_${idx}`);
-                if(n) n.value = g.name; if(t) t.value = g.text;
-            });
-        } catch(e){}
+    function getSections() {
+        let num = parseInt(getVal('numSections')) || 3;
+        return Array.from({length: num}, (_, i) => ({
+            r: getVal(`sec_${i+1}_rows`) || 3,
+            c: getVal(`sec_${i+1}_cols`) || 4
+        }));
     }
 
-    function saveData() {
-        let secs = [], grps = [];
-        let numSec = document.getElementById('numSections').value;
-        let numGrp = document.getElementById('numGroups').value;
-
-        for(let i=1; i<=numSec; i++) {
-            let r = document.getElementById(`sec_${i}_rows`), c = document.getElementById(`sec_${i}_cols`);
-            if(r && c) secs.push({ r: r.value, c: c.value });
-        }
-        for(let i=0; i<numGrp; i++) {
-            let n = document.getElementById(`group_name_${i}`), t = document.getElementById(`group_text_${i}`);
-            if(n && t) grps.push({ name: n.value, text: t.value });
-        }
-
-        grps.forEach(g => {
-            let names = g.text.split(/[\n,]+/).map(n => n.trim()).filter(Boolean);
-            names.forEach(name => {
-                if(!participantDetails[name]) {
-                    participantDetails[name] = { gender: 'none', car: false };
-                }
-            });
-        });
-
-        try {
-            localStorage.setItem('smart_seat_sections', JSON.stringify(secs));
-            localStorage.setItem('smart_seat_groups', JSON.stringify(grps));
-            localStorage.setItem('smart_seat_assignments', JSON.stringify(seatAssignments));
-            localStorage.setItem('smart_seat_teams', JSON.stringify(teamAssignments));
-            localStorage.setItem('smart_seat_details', JSON.stringify(participantDetails));
-        } catch(e){}
-    }
-
-    function openDetailModal() {
-        saveData(); 
-        let container = document.getElementById('detailListContainer');
-        container.innerHTML = '';
-        
-        let allNames = [];
-        let numGrp = document.getElementById('numGroups').value;
-        for (let i = 0; i < numGrp; i++) {
-            let tText = document.getElementById(`group_text_${i}`)?.value || '';
-            let names = tText.split(/[\n,]+/).map(n => n.trim()).filter(Boolean);
-            allNames.push(...names);
-        }
-
-        if (allNames.length === 0) {
-            container.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">입력된 참가자 이름이 없습니다. 그룹 명단에 이름을 먼저 입력해주세요!</div>';
-            document.getElementById('detailModal').style.display = 'flex';
-            return;
-        }
-
-        allNames.forEach(name => {
-            if(!participantDetails[name]) {
-                participantDetails[name] = { gender: 'none', car: false };
-            }
-            let info = participantDetails[name];
-
-            let item = document.createElement('div');
-            item.className = 'detail-item';
-            item.innerHTML = `
-                <span style="font-weight: bold; width: 100px; overflow: hidden; text-overflow: ellipsis;">${name}</span>
-                <div style="display: flex; gap: 15px; align-items: center;">
-                    <label>성별: 
-                        <select id="detail_gender_${name}" onchange="updateDetailVal('${name}')" style="padding: 3px; border-radius: 4px; border: 1px solid #ccc;">
-                            <option value="none" ${info.gender === 'none' ? 'selected' : ''}>미설정</option>
-                            <option value="m" ${info.gender === 'm' ? 'selected' : ''}>남성</option>
-                            <option value="f" ${info.gender === 'f' ? 'selected' : ''}>여성</option>
-                        </select>
-                    </label>
-                    <label style="cursor: pointer;">
-                        <input type="checkbox" id="detail_car_${name}" ${info.car ? 'checked' : ''} onchange="updateDetailVal('${name}')"> 차량 있음 🚗
-                    </label>
-                </div>
-            `;
-            container.appendChild(item);
-        });
-
-        document.getElementById('detailModal').style.display = 'flex';
-    }
-
-    function updateDetailVal(name) {
-        let gSelect = document.getElementById(`detail_gender_${name}`);
-        let cCheck = document.getElementById(`detail_car_${name}`);
-        if(gSelect && cCheck) {
-            participantDetails[name] = {
-                gender: gSelect.value,
-                car: cCheck.checked
-            };
-            try { localStorage.setItem('smart_seat_details', JSON.stringify(participantDetails)); } catch(e){}
-        }
-    }
-
-    function closeDetailModal() {
-        document.getElementById('detailModal').style.display = 'none';
-        saveData();
-        alert('성별 및 차량 정보가 저장되었습니다.');
-    }
-
-    function exportBackupJSON() {
-        saveData();
-        let data = {
-            sections: JSON.parse(localStorage.getItem('smart_seat_sections') || '[]'),
-            groups: JSON.parse(localStorage.getItem('smart_seat_groups') || '[]'),
-            assignments: JSON.parse(localStorage.getItem('smart_seat_assignments') || '{}'),
-            teams: JSON.parse(localStorage.getItem('smart_seat_teams') || '{}'),
-            details: JSON.parse(localStorage.getItem('smart_seat_details') || '{}')
-        };
-        let blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-        let url = URL.createObjectURL(blob);
-        let a = document.createElement('a');
-        a.href = url;
-        a.download = 'seat_program_backup.json';
-        a.click();
-        URL.revokeObjectURL(url);
-    }
-
-    function importBackupJSON(event) {
-        let file = event.target.files[0];
-        if (!file) return;
-        let reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                let data = JSON.parse(e.target.result);
-                if (data.sections && data.groups) {
-                    localStorage.setItem('smart_seat_sections', JSON.stringify(data.sections));
-                    localStorage.setItem('smart_seat_groups', JSON.stringify(data.groups));
-                    localStorage.setItem('smart_seat_assignments', JSON.stringify(data.assignments || {}));
-                    localStorage.setItem('smart_seat_teams', JSON.stringify(data.teams || {}));
-                    localStorage.setItem('smart_seat_details', JSON.stringify(data.details || {}));
-                    
-                    loadData();
-                    renderSectionConfigs();
-                    renderGroupConfigs();
-                    loadInputs();
-                    renderTeamConfigs();
-                    alert('백업 파일을 성공적으로 불러왔습니다!');
-                } else {
-                    alert('올바른 백업 파일 형식이 아닙니다.');
-                }
-            } catch(err) {
-                alert('파일을 읽는 중 오류가 발생했습니다.');
-            }
-        };
-        reader.readAsText(file);
-    }
-
-    function resetToDefaultData() {
-        if(confirm('기본 설정으로 초기화하시겠습니까?')) {
-            localStorage.setItem('smart_seat_sections', JSON.stringify(DEFAULT_DATA.sections));
-            localStorage.setItem('smart_seat_groups', JSON.stringify(DEFAULT_DATA.groups));
-            localStorage.setItem('smart_seat_details', JSON.stringify(DEFAULT_DATA.participantDetails));
-            seatAssignments = {};
-            seatHistory = [];
-            teamAssignments = {};
-            participantDetails = {};
-            localStorage.setItem('smart_seat_assignments', JSON.stringify(seatAssignments));
-            localStorage.setItem('smart_seat_teams', JSON.stringify(teamAssignments));
-            
-            loadData();
-            renderSectionConfigs();
-            renderGroupConfigs();
-            loadInputs();
-            renderTeamConfigs();
-            alert('초기화가 완료되었습니다.');
-        }
+    function getGroups() {
+        let num = parseInt(getVal('numGroups')) || 2;
+        return Array.from({length: num}, (_, i) => ({
+            name: getVal(`group_name_${i}`) || `집단 ${i+1}`,
+            text: getVal(`group_text_${i}`) || ''
+        }));
     }
 
     function renderSectionConfigs() {
-        let num = parseInt(document.getElementById('numSections').value) || 1;
-        let container = document.getElementById('sectionConfigs');
-        let old = getSectionValues();
-        container.innerHTML = Array.from({length: num}, (_, i) => {
-            let idx = i + 1;
-            let r = old[idx]?.r || DEFAULT_DATA.sections[i]?.r || 3;
-            let c = old[idx]?.c || DEFAULT_DATA.sections[i]?.c || 2;
-            return `<div class="section-config-card"><b>${idx}분단</b><br>행: <input type="number" id="sec_${idx}_rows" min="1" max="10" value="${r}"><br>열: <input type="number" id="sec_${idx}_cols" min="1" max="10" value="${c}"></div>`;
-        }).join('');
-    }
-
-    function getSectionValues() {
-        let res = {};
-        for(let i=1; i<=10; i++) {
-            let r = document.getElementById(`sec_${i}_rows`), c = document.getElementById(`sec_${i}_cols`);
-            if(r && c) res[i] = { r: r.value, c: c.value };
-        }
-        return res;
+        let num = parseInt(getVal('numSections')) || 1;
+        let old = JSON.parse(localStorage.getItem('ss_sec') || '[{"r":3,"c":4}]');
+        document.getElementById('sectionConfigs').innerHTML = Array.from({length: num}, (_, i) => 
+            `<div class="section-config-card"><b>${i+1}분단</b><br>행: <input type="number" id="sec_${i+1}_rows" value="${old[i]?.r || 3}"><br>열: <input type="number" id="sec_${i+1}_cols" value="${old[i]?.c || 4}"></div>`
+        ).join('');
     }
 
     function renderGroupConfigs() {
-        let num = parseInt(document.getElementById('numGroups').value) || 1;
-        let container = document.getElementById('groupConfigs');
-        let old = getGroupValues();
-
-        container.innerHTML = Array.from({length: num}, (_, i) => {
-            let name = old[i]?.name || DEFAULT_DATA.groups[i]?.name || `집단 ${i+1}`;
-            let text = old[i]?.text || DEFAULT_DATA.groups[i]?.text || '';
-            return `<div class="group-input-box"><div style="font-weight:bold; font-size:13px; margin-bottom:4px;">집단 ${i+1} 설정</div>명칭: <input type="text" id="group_name_${i}" value="${name}"><textarea id="group_text_${i}" placeholder="이름을 줄바꿈으로 입력">${text}</textarea></div>`;
-        }).join('');
+        let num = parseInt(getVal('numGroups')) || 1;
+        let old = JSON.parse(localStorage.getItem('ss_grp') || '[{"name":"A그룹","text":""}]');
+        document.getElementById('groupConfigs').innerHTML = Array.from({length: num}, (_, i) => 
+            `<div class="group-input-box"><b>집단 ${i+1}</b><br>명칭: <input type="text" id="group_name_${i}" value="${old[i]?.name || ''}"><textarea id="group_text_${i}" placeholder="이름 줄바꿈 입력">${old[i]?.text || ''}</textarea></div>`
+        ).join('');
     }
 
-    function getGroupValues() {
-        let res = [];
-        for(let i=0; i<10; i++) {
-            let n = document.getElementById(`group_name_${i}`), t = document.getElementById(`group_text_${i}`);
-            if(n && t) res[i] = { name: n.value, text: t.value };
-        }
-        return res;
+    function loadInputs() {
+        let s = JSON.parse(localStorage.getItem('ss_sec') || '[]');
+        s.forEach((v, i) => { 
+            if(document.getElementById(`sec_${i+1}_rows`)) document.getElementById(`sec_${i+1}_rows`).value = v.r; 
+            if(document.getElementById(`sec_${i+1}_cols`)) document.getElementById(`sec_${i+1}_cols`).value = v.c; 
+        });
+        let g = JSON.parse(localStorage.getItem('ss_grp') || '[]');
+        g.forEach((v, i) => { 
+            if(document.getElementById(`group_name_${i}`)) document.getElementById(`group_name_${i}`).value = v.name; 
+            if(document.getElementById(`group_text_${i}`)) document.getElementById(`group_text_${i}`).value = v.text; 
+        });
     }
 
-    function goToStep2() {
+    function saveData() {
+        getGroups().forEach(g => {
+            g.text.split(/[\n,]+/).forEach(n => {
+                let name = n.trim();
+                if(name && !participantDetails[name]) participantDetails[name] = { gender: 'none', car: false };
+            });
+        });
+        saveAll();
+    }
+
+    function openDetailModal() {
         saveData();
-        document.getElementById('page1').classList.remove('active');
-        document.getElementById('page3').classList.remove('active');
-        document.getElementById('page2').classList.add('active');
-        selectedStudent = null;
-        seatHistory = []; 
-        renderSidebar();
-        renderSeatMap();
+        let container = document.getElementById('detailListContainer');
+        container.innerHTML = '';
+        let names = [];
+        getGroups().forEach(g => names.push(...g.text.split(/[\n,]+/).map(n => n.trim()).filter(Boolean)));
+        
+        if(!names.length) { container.innerHTML = '입력된 이름이 없습니다.'; document.getElementById('detailModal').style.display = 'flex'; return; }
+        
+        names.forEach(name => {
+            if(!participantDetails[name]) participantDetails[name] = { gender: 'none', car: false };
+            let info = participantDetails[name];
+            container.innerHTML += `<div class="detail-item"><b>${name}</b>
+                <div>성별: <select id="dg_${name}" onchange="participantDetails['${name}'].gender=this.value"><option value="none" ${info.gender==='none'?'selected':''}>미설정</option><option value="m" ${info.gender==='m'?'selected':''}>남</option><option value="f" ${info.gender==='f'?'selected':''}>여</option></select>
+                <label><input type="checkbox" id="dc_${name}" ${info.car?'checked':''} onchange="participantDetails['${name}'].car=this.checked"> 차량</label></div></div>`;
+        });
+        document.getElementById('detailModal').style.display = 'flex';
     }
 
-    function goToStep3() {
+    function goToStep(step) {
         saveData();
-        document.getElementById('page2').classList.remove('active');
-        document.getElementById('page3').classList.add('active');
-        selectedTeam = null;
-        renderTeamConfigs();
-        renderTeamSidebar();
-        renderTeamSeatMap();
+        [1,2,3].forEach(i => document.getElementById(`page${i}`).classList.remove('active'));
+        document.getElementById(`page${step}`).classList.add('active');
+        if(step === 2) { selectedStudent = null; seatHistory = []; renderAll(); }
+        if(step === 3) { selectedTeam = null; renderTeamConfigs(); renderTeamSeatMap(); }
     }
 
-    function getDisplayName(name) {
-        let info = participantDetails[name];
-        let carIcon = (info && info.car) ? ' 🚗' : '';
-        return name + carIcon;
-    }
+    function renderAll() { renderSidebar(); renderSeatMap(); }
+    function getDisplayName(name) { return name + ((participantDetails[name]?.car) ? ' 🚗' : ''); }
 
     function renderSidebar() {
         let container = document.getElementById('sidebar-groups');
         container.innerHTML = '';
-        let numGrp = document.getElementById('numGroups').value;
-        let query = document.getElementById('searchInput').value.toLowerCase();
+        let query = getVal('searchInput')?.toLowerCase() || '';
 
-        for (let i = 0; i < numGrp; i++) {
-            let gName = document.getElementById(`group_name_${i}`)?.value;
-            let gText = document.getElementById(`group_text_${i}`)?.value;
-            if(!gName || !gText) continue;
-
-            let names = gText.split(/[\n,]+/).map(n => n.trim()).filter(Boolean).sort((a,b) => a.localeCompare(b, 'ko'));
-            let categoryDiv = document.createElement('div');
-            categoryDiv.className = 'group-category';
-            categoryDiv.innerHTML = `<h4>${gName} (${names.length}명)</h4>`;
-
-            let visibleCount = 0;
+        getGroups().forEach(g => {
+            let names = g.text.split(/[\n,]+/).map(n => n.trim()).filter(Boolean).sort();
+            let div = document.createElement('div');
+            div.className = 'group-category';
+            div.innerHTML = `<h4>${g.name} (${names.length})</h4>`;
+            
             names.forEach(name => {
                 if(query && !name.toLowerCase().includes(query)) return;
-                visibleCount++;
-
+                let info = participantDetails[name] || { gender: 'none' };
                 let tag = document.createElement('div');
-                
-                let info = participantDetails[name] || { gender: 'none', car: false };
-                let genderClass = 'gender-none';
-                if(info.gender === 'm') genderClass = 'gender-m';
-                else if(info.gender === 'f') genderClass = 'gender-f';
-
-                tag.className = `name-tag ${genderClass}`;
+                tag.className = `name-tag gender-${info.gender}`;
                 tag.innerText = getDisplayName(name);
-
-                let isAssigned = Object.values(seatAssignments).some(s => s.name === name);
-                if(isAssigned) {
-                    tag.classList.add('assigned');
-                } else {
+                if(Object.values(seatAssignments).some(s => s.name === name)) tag.classList.add('assigned');
+                else {
                     if(selectedStudent === name) tag.classList.add('selected');
-                    tag.onclick = () => {
-                        selectedStudent = (selectedStudent === name) ? null : name;
-                        renderSidebar();
-                    };
+                    tag.onclick = () => { selectedStudent = (selectedStudent === name) ? null : name; renderSidebar(); };
                 }
-                categoryDiv.appendChild(tag);
+                div.appendChild(tag);
             });
-
-            if(visibleCount > 0) container.appendChild(categoryDiv);
-        }
+            container.appendChild(div);
+        });
     }
 
     function renderSeatMap() {
         let container = document.getElementById('seat-container');
         container.innerHTML = '';
-        let numSec = document.getElementById('numSections').value;
+        getSections().forEach((sec, i) => {
+            let box = document.createElement('div');
+            box.className = 'group-seat-box';
+            box.innerHTML = `<h4>${i+1}분단 (${sec.r}x${sec.c})</h4>`;
+            let grid = document.createElement('div');
+            grid.className = 'seat-grid';
+            grid.style.gridTemplateColumns = `repeat(${sec.c}, minmax(55px, 75px))`;
 
-        for (let i = 1; i <= numSec; i++) {
-            let rows = parseInt(document.getElementById(`sec_${i}_rows`)?.value) || 1;
-            let cols = parseInt(document.getElementById(`sec_${i}_cols`)?.value) || 1;
-
-            let groupDiv = document.createElement('div');
-            groupDiv.className = 'group-seat-box';
-            groupDiv.innerHTML = `<h4>${i}분단 (${rows}x${cols})</h4>`;
-
-            let gridDiv = document.createElement('div');
-            gridDiv.className = 'seat-grid';
-            gridDiv.style.gridTemplateColumns = `repeat(${cols}, minmax(55px, 75px))`;
-
-            for (let r = 0; r < rows; r++) {
-                for (let c = 0; c < cols; c++) {
-                    let seatId = `sec_${i}_r_${r}_c_${c}`;
+            for(let r=0; r<sec.r; r++) {
+                for(let c=0; c<sec.c; c++) {
+                    let id = `sec_${i+1}_r_${r}_c_${c}`;
                     let seat = document.createElement('div');
                     seat.className = 'seat';
-                    let assigned = seatAssignments[seatId];
-
+                    let assigned = seatAssignments[id];
                     if(assigned) {
                         seat.innerText = getDisplayName(assigned.name);
-                        let info = participantDetails[assigned.name] || { gender: 'none' };
-                        if(info.gender === 'm') seat.classList.add('filled-m');
-                        else if(info.gender === 'f') seat.classList.add('filled-f');
-                        else seat.classList.add('filled-none');
+                        let gender = participantDetails[assigned.name]?.gender || 'none';
+                        seat.classList.add(`filled-${gender}`);
                     }
-
                     seat.onclick = () => {
-                        if (!assigned && !selectedStudent) {
-                            return alert('먼저 대기실에서 이름을 선택해주세요!');
-                        }
-
-                        seatHistory.push(JSON.parse(JSON.stringify(seatAssignments)));
-
-                        if(assigned) {
-                            delete seatAssignments[seatId];
-                            delete teamAssignments[seatId];
-                        } else if(selectedStudent) {
-                            seatAssignments[seatId] = { name: selectedStudent };
-                            selectedStudent = null;
-                        }
-
-                        try { 
-                            localStorage.setItem('smart_seat_assignments', JSON.stringify(seatAssignments)); 
-                            localStorage.setItem('smart_seat_teams', JSON.stringify(teamAssignments));
-                        } catch(e){}
-                        renderSeatMap();
-                        renderSidebar();
+                        if(!assigned && !selectedStudent) return alert('대기실에서 이름을 먼저 선택하세요!');
+                        seatHistory.push({...seatAssignments});
+                        if(assigned) { delete seatAssignments[id]; delete teamAssignments[id]; }
+                        else if(selectedStudent) { seatAssignments[id] = { name: selectedStudent }; selectedStudent = null; }
+                        saveAll(); renderAll();
                     };
-                    gridDiv.appendChild(seat);
+                    grid.appendChild(seat);
                 }
             }
-            groupDiv.appendChild(gridDiv);
-            container.appendChild(groupDiv);
-        }
+            box.appendChild(grid); container.appendChild(box);
+        });
     }
 
-    function undoSeatAction() {
-        if (seatHistory.length === 0) {
-            alert('되돌릴 작업이 없습니다.');
-            return;
-        }
+    function undoSeat() {
+        if(!seatHistory.length) return alert('취소할 내역이 없습니다.');
         seatAssignments = seatHistory.pop();
         selectedStudent = null;
-        try { localStorage.setItem('smart_seat_assignments', JSON.stringify(seatAssignments)); } catch(e){}
-        renderSeatMap();
-        renderSidebar();
+        saveAll(); renderAll();
     }
 
-    function resetSeats() {
-        if(confirm('모든 좌석 배치를 초기화하시겠습니까?')) {
-            seatHistory.push(JSON.parse(JSON.stringify(seatAssignments)));
-            seatAssignments = {};
-            teamAssignments = {};
-            selectedStudent = null;
-            try { 
-                localStorage.setItem('smart_seat_assignments', JSON.stringify(seatAssignments)); 
-                localStorage.setItem('smart_seat_teams', JSON.stringify(teamAssignments));
-            } catch(e){}
-            renderSeatMap();
-            renderSidebar();
-        }
+    function getTeamConfigs() {
+        let num = parseInt(getVal('numTeams')) || 1;
+        return Array.from({length: num}, (_, i) => ({
+            name: getVal(`team_name_${i}`) || `${i+1}팀`,
+            color: getVal(`team_color_${i}`) || COLORS[i % COLORS.length]
+        }));
     }
 
     function renderTeamConfigs() {
-        let num = parseInt(document.getElementById('numTeams').value) || 1;
-        let container = document.getElementById('teamConfigsList');
-        let oldTeams = getTeamConfigValues();
-
-        container.innerHTML = Array.from({length: num}, (_, i) => {
-            let tName = oldTeams[i]?.name || `${i+1}팀`;
-            let tColor = oldTeams[i]?.color || PRESET_COLORS[i % PRESET_COLORS.length];
-            return `<div style="display: flex; gap: 5px; margin-bottom: 5px; align-items: center;">
-                <input type="text" id="team_name_${i}" value="${tName}" style="width: 90px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; font-size:12px;" oninput="renderTeamSidebar()">
-                <input type="color" id="team_color_${i}" value="${tColor}" style="width: 35px; height: 26px; border: none; cursor: pointer; background: none;" onchange="renderTeamSidebar(); renderTeamSeatMap();">
-            </div>`;
-        }).join('');
+        let num = parseInt(getVal('numTeams')) || 1;
+        document.getElementById('teamConfigsList').innerHTML = Array.from({length: num}, (_, i) => 
+            `<div style="display:flex;gap:5px;margin-bottom:5px;align-items:center;">
+                <input type="text" id="team_name_${i}" value="${i+1}팀" style="width:90px;padding:4px;font-size:12px;" oninput="renderTeamSidebar()">
+                <input type="color" id="team_color_${i}" value="${COLORS[i%COLORS.length]}" style="width:35px;height:26px;border:none;cursor:pointer;" onchange="renderTeamSidebar(); renderTeamSeatMap();">
+            </div>`
+        ).join('');
         renderTeamSidebar();
-    }
-
-    function getTeamConfigValues() {
-        let res = [];
-        for(let i=0; i<10; i++) {
-            let n = document.getElementById(`team_name_${i}`), c = document.getElementById(`team_color_${i}`);
-            if(n && c) res[i] = { name: n.value, color: c.value };
-        }
-        return res;
     }
 
     function renderTeamSidebar() {
         let container = document.getElementById('team-select-sidebar');
         container.innerHTML = '';
-        let numTeams = parseInt(document.getElementById('numTeams').value) || 1;
-        let teamValues = getTeamConfigValues();
-
-        for (let i = 0; i < numTeams; i++) {
-            let tName = teamValues[i]?.name || `${i+1}팀`;
-            let tColor = teamValues[i]?.color || PRESET_COLORS[i % PRESET_COLORS.length];
-
+        getTeamConfigs().forEach((t, i) => {
             let tag = document.createElement('div');
-            tag.className = 'team-tag';
-            if(selectedTeam === i) tag.classList.add('selected');
-            tag.style.borderColor = tColor;
-            tag.innerHTML = `<span>${tName}</span><span style="width: 14px; height: 14px; background: ${tColor}; border-radius: 50%; display: inline-block;"></span>`;
-            
-            tag.onclick = () => {
-                selectedTeam = (selectedTeam === i) ? null : i;
-                renderTeamSidebar();
-            };
+            tag.className = `team-tag ${selectedTeam===i?'selected':''}`;
+            tag.style.borderColor = t.color;
+            tag.innerHTML = `<span>${t.name}</span><span style="width:14px;height:14px;background:${t.color};border-radius:50%;"></span>`;
+            tag.onclick = () => { selectedTeam = (selectedTeam === i) ? null : i; renderTeamSidebar(); };
             container.appendChild(tag);
-        }
+        });
     }
 
     function renderTeamSeatMap() {
         let container = document.getElementById('team-seat-container');
         container.innerHTML = '';
-        let numSec = document.getElementById('numSections').value;
-        let teamValues = getTeamConfigValues();
+        let teams = getTeamConfigs();
 
-        for (let i = 1; i <= numSec; i++) {
-            let rows = parseInt(document.getElementById(`sec_${i}_rows`)?.value) || 1;
-            let cols = parseInt(document.getElementById(`sec_${i}_cols`)?.value) || 1;
+        getSections().forEach((sec, i) => {
+            let box = document.createElement('div');
+            box.className = 'group-seat-box';
+            box.innerHTML = `<h4>${i+1}분단 (${sec.r}x${sec.c})</h4>`;
+            let grid = document.createElement('div');
+            grid.className = 'seat-grid';
+            grid.style.gridTemplateColumns = `repeat(${sec.c}, minmax(55px, 75px))`;
 
-            let groupDiv = document.createElement('div');
-            groupDiv.className = 'group-seat-box';
-            groupDiv.innerHTML = `<h4>${i}분단 (${rows}x${cols})</h4>`;
-
-            let gridDiv = document.createElement('div');
-            gridDiv.className = 'seat-grid';
-            gridDiv.style.gridTemplateColumns = `repeat(${cols}, minmax(55px, 75px))`;
-
-            for (let r = 0; r < rows; r++) {
-                for (let c = 0; c < cols; c++) {
-                    let seatId = `sec_${i}_r_${r}_c_${c}`;
+            for(let r=0; r<sec.r; r++) {
+                for(let c=0; c<sec.c; c++) {
+                    let id = `sec_${i+1}_r_${r}_c_${c}`;
                     let seat = document.createElement('div');
                     seat.className = 'seat';
-                    let assigned = seatAssignments[seatId];
-                    let teamIdx = teamAssignments[seatId];
+                    let assigned = seatAssignments[id];
+                    let tIdx = teamAssignments[id];
 
                     if(assigned) {
                         seat.innerText = getDisplayName(assigned.name);
-                        let info = participantDetails[assigned.name] || { gender: 'none' };
-                        if(info.gender === 'm') seat.classList.add('filled-m');
-                        else if(info.gender === 'f') seat.classList.add('filled-f');
-                        else seat.classList.add('filled-none');
-
-                        if(teamIdx !== undefined && teamValues[teamIdx]) {
-                            let tColor = teamValues[teamIdx].color;
-                            seat.style.border = `3px solid ${tColor}`;
-                            seat.style.boxShadow = `0 0 5px ${tColor}`;
+                        seat.classList.add(`filled-${participantDetails[assigned.name]?.gender || 'none'}`);
+                        if(tIdx !== undefined && teams[tIdx]) {
+                            seat.style.border = `3px solid ${teams[tIdx].color}`;
+                            seat.style.boxShadow = `0 0 5px ${teams[tIdx].color}`;
                         }
                     }
-
                     seat.onclick = () => {
-                        if(!assigned) return; 
-
-                        if(selectedTeam !== null) {
-                            if(teamAssignments[seatId] === selectedTeam) {
-                                delete teamAssignments[seatId];
-                            } else {
-                                teamAssignments[seatId] = selectedTeam;
-                            }
-                            try { localStorage.setItem('smart_seat_teams', JSON.stringify(teamAssignments)); } catch(e){}
-                            renderTeamSeatMap();
-                        } else {
-                            alert('먼저 왼쪽 사이드바에서 부여할 팀을 선택해주세요!');
-                        }
+                        if(!assigned || selectedTeam === null) return alert('팀을 선택한 뒤 자리를 클릭하세요!');
+                        if(teamAssignments[id] === selectedTeam) delete teamAssignments[id];
+                        else teamAssignments[id] = selectedTeam;
+                        saveAll(); renderTeamSeatMap();
                     };
-                    gridDiv.appendChild(seat);
+                    grid.appendChild(seat);
                 }
             }
-            groupDiv.appendChild(gridDiv);
-            container.appendChild(groupDiv);
-        }
-    }
-
-    function resetTeams() {
-        if(confirm('모든 팀 배정을 초기화하시겠습니까?')) {
-            teamAssignments = {};
-            selectedTeam = null;
-            try { localStorage.setItem('smart_seat_teams', JSON.stringify(teamAssignments)); } catch(e){}
-            renderTeamSeatMap();
-        }
-    }
-
-    function exportSeatImage() {
-        let target = document.getElementById('seat-map-capture');
-        html2canvas(target, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
-            let link = document.createElement('a');
-            link.download = '자리배치도.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
+            box.appendChild(grid); container.appendChild(box);
         });
     }
 
-    function exportTeamImage() {
-        let target = document.getElementById('team-map-capture');
-        html2canvas(target, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
-            let link = document.createElement('a');
-            link.download = '팀배치도.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
+    function exportImage(targetId, filename) {
+        html2canvas(document.getElementById(targetId), { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+            let a = document.createElement('a');
+            a.download = filename; a.href = canvas.toDataURL(); a.click();
         });
+    }
+
+    function exportBackupJSON() {
+        saveData();
+        let blob = new Blob([JSON.stringify({sec: getSections(), grp: getGroups(), seat: seatAssignments, team: teamAssignments, det: participantDetails})], {type: 'application/json'});
+        let a = document.createElement('a'); a.download = 'backup.json'; a.href = URL.createObjectURL(blob); a.click();
+    }
+
+    function importBackupJSON(e) {
+        let reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                let data = JSON.parse(event.target.result);
+                localStorage.setItem('ss_sec', JSON.stringify(data.sec));
+                localStorage.setItem('ss_grp', JSON.stringify(data.grp));
+                localStorage.setItem('ss_seat', JSON.stringify(data.seat));
+                localStorage.setItem('ss_team', JSON.stringify(data.team));
+                localStorage.setItem('ss_det', JSON.stringify(data.det));
+                loadData(); renderSectionConfigs(); renderGroupConfigs(); loadInputs(); renderTeamConfigs();
+                alert('복원 완료!');
+            } catch(err) { alert('파일 오류'); }
+        };
+        reader.readAsText(e.target.files[0]);
+    }
+
+    function resetData() {
+        if(confirm('초기화하시겠습니까?')) {
+            localStorage.clear();
+            seatAssignments = {}; teamAssignments = {}; participantDetails = {}; seatHistory = [];
+            renderSectionConfigs(); renderGroupConfigs(); loadInputs();
+            alert('초기화되었습니다.');
+        }
     }
 </script>
 </body>
