@@ -76,8 +76,11 @@
                 <div id="groupConfigs"></div>
             </div>
         </div>
-        <div style="text-align: center; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <div style="text-align: center; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
             <button class="secondary" onclick="saveData()">💾 설정 저장하기</button>
+            <button class="purple" onclick="exportBackupJSON()">📥 백업 파일 다운로드</button>
+            <button class="purple" onclick="document.getElementById('importFile').click()">📂 백업 파일 불러오기</button>
+            <input type="file" id="importFile" style="display:none" accept=".json" onchange="importBackupJSON(event)">
             <button class="danger" onclick="resetToDefaultData()">🔄 명단 및 설정 초기화</button>
             <button class="success" onclick="goToStep2()" style="font-size: 16px; padding: 12px 25px;">🚀 자리 배치 시작</button>
         </div>
@@ -114,7 +117,6 @@
 </div>
 
 <script>
-    // 코드 내부에 기본 저장된 백업 데이터
     const DEFAULT_DATA = {
         sections: [
             { r: "4", c: "8" },
@@ -157,7 +159,6 @@
             let s = JSON.parse(localStorage.getItem('smart_seat_sections'));
             let g = JSON.parse(localStorage.getItem('smart_seat_groups'));
             
-            // 저장된 데이터가 없으면 기본 데이터 탑재
             if (!s || !g) {
                 s = DEFAULT_DATA.sections;
                 g = DEFAULT_DATA.groups;
@@ -208,8 +209,53 @@
             localStorage.setItem('smart_seat_sections', JSON.stringify(secs));
             localStorage.setItem('smart_seat_groups', JSON.stringify(grps));
             localStorage.setItem('smart_seat_assignments', JSON.stringify(seatAssignments));
-            alert('현재 설정을 저장했습니다.');
+            alert('현재 설정이 안전하게 저장되었습니다.');
         } catch(e){}
+    }
+
+    // 백업 파일 다운로드 (JSON)
+    function exportBackupJSON() {
+        saveData();
+        let data = {
+            sections: JSON.parse(localStorage.getItem('smart_seat_sections') || '[]'),
+            groups: JSON.parse(localStorage.getItem('smart_seat_groups') || '[]'),
+            assignments: JSON.parse(localStorage.getItem('smart_seat_assignments') || '{}')
+        };
+        let blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = 'seat_program_backup.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // 백업 파일 불러오기 (JSON)
+    function importBackupJSON(event) {
+        let file = event.target.files[0];
+        if (!file) return;
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                let data = JSON.parse(e.target.result);
+                if (data.sections && data.groups) {
+                    localStorage.setItem('smart_seat_sections', JSON.stringify(data.sections));
+                    localStorage.setItem('smart_seat_groups', JSON.stringify(data.groups));
+                    localStorage.setItem('smart_seat_assignments', JSON.stringify(data.assignments || {}));
+                    
+                    loadData();
+                    renderSectionConfigs();
+                    renderGroupConfigs();
+                    loadInputs();
+                    alert('백업 파일을 성공적으로 불러왔습니다!');
+                } else {
+                    alert('올바른 백업 파일 형식이 아닙니다.');
+                }
+            } catch(err) {
+                alert('파일을 읽는 중 오류가 발생했습니다.');
+            }
+        };
+        reader.readAsText(file);
     }
 
     function resetToDefaultData() {
